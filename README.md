@@ -34,10 +34,12 @@ The output of the provided example will show messages printed asynchronously by 
 
 To run the example, execute the Python script containing the provided code. Ensure you have Python installed on your system.
 
+```bash
+python asynchronous_model.py
+```
+
 ## Contributions
 
 Contributions to this project are welcome! If you find any issues or have suggestions for improvement, feel free to open an issue or submit a pull request.
 
 
-```bash
-python asynchronous_model.py
