@@ -1,35 +1,43 @@
+# Asynchronous Model and Event Loop
 
-# Experiment/Research: Round Robin Basic Scheduler Implementation
+This project demonstrates an asynchronous model and event loop implemented in Python. The asynchronous model allows executing asynchronous tasks using coroutines and generators, while the event loop manages the execution of these tasks.
 
-## Introduction:
-This experiment demonstrates a basic implementation of a Round Robin scheduler using Python. A Round Robin scheduler is a preemptive CPU scheduling algorithm that allocates a fixed time slice to each process or task in a circular queue. Once a task's time slice expires, it is put back at the end of the queue, allowing other tasks to execute in the meantime.
+## Overview
 
-## Code Overview:
-- The code consists of a `Scheduler` class responsible for managing the execution of tasks.
-- Tasks are added to the scheduler using `wait` and `wait_until` methods.
-- `run` method executes tasks in a round-robin manner until the call queue and wait list are empty.
-- The experiment includes two sample functions `f1` and `f2` which represent tasks to be executed by the scheduler.
+The asynchronous model consists of the following components:
 
-## Usage:
-- To use the scheduler, create an instance of `Scheduler`.
-- Add tasks using `wait` or `wait_until` methods.
-- Start the scheduler by calling the `run` method.
+- **Coroutines**: Coroutines are implemented using Python generators. Coroutines can pause their execution using the `yield` keyword and resume later.
+- **Event Loop**: The event loop manages the execution of coroutines. It maintains a task queue and handles sleeping coroutines.
 
-## Example:
-```python
-sched = Scheduler()
+## YScheduler Class
 
-def f1(x, stop):
-    if x < stop:
-        print("Hello my friends")
-        sched.wait(lambda: f1(x + 1, stop))
+The `YScheduler` class is responsible for managing coroutines and the event loop:
 
-def f2(x, stop):
-    if x < stop:
-        print("Printing from another thread kind offf!!!")
-        sched.wait_until(lambda: f2(x + 1, stop), 3)
+- `wait(coro)`: Adds a coroutine to the task queue for execution.
+- `ev_sleep(duration)`: Schedules the current coroutine to sleep for a specified duration.
+- `event_loop_begin()`: Starts the event loop, which executes coroutines and manages sleeping coroutines.
 
-if __name__ == "__main__":
-    sched.wait(lambda: f1(0, 4))
-    sched.wait(lambda: f2(0, 3))
-    sched.run()
+## Example Usage
+
+The provided example demonstrates the usage of the asynchronous model:
+
+1. Two example coroutines (`s1_Y` and `s2_Y`) are defined using generators. These coroutines print messages asynchronously and schedule themselves to sleep using `sched.ev_sleep`.
+2. An instance of `YScheduler` (`sched`) is created.
+3. The example coroutines are scheduled for execution using `sched.wait`.
+4. The event loop is started using `sched.event_loop_begin`.
+
+## Example Output
+
+The output of the provided example will show messages printed asynchronously by the coroutines, with delays introduced by the sleep durations specified in the coroutines.
+
+## Running the Example
+
+To run the example, execute the Python script containing the provided code. Ensure you have Python installed on your system.
+
+## Contributions
+
+Contributions to this project are welcome! If you find any issues or have suggestions for improvement, feel free to open an issue or submit a pull request.
+
+
+```bash
+python asynchronous_model.py
