@@ -5,7 +5,7 @@ import heapq
 from time import sleep
 from collections import deque
 
-#Round Robin basic scheduler in here kind off!!
+#Round Robin basic scheduler in here kind off!
 class Scheduler:
     def __init__(self) -> None:
         self.call_queue = deque()
