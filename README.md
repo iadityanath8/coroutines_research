@@ -1,45 +1,42 @@
-# Asynchronous Model and Event Loop
+# Asynchronous Programming with Generators and Yield
 
-This project demonstrates an asynchronous model and event loop implemented in Python. The asynchronous model allows executing asynchronous tasks using coroutines and generators, while the event loop manages the execution of these tasks.
+This project demonstrates asynchronous programming in Python using generators and the `yield` statement. It includes a simple scheduler, `YScheduler`, which manages the execution of coroutines based on cooperative multitasking.
 
-## Overview
+## Basic Example of Generators
 
-The asynchronous model consists of the following components:
+The `c1` function is an example of a coroutine defined using a generator. It calculates the running sum of provided values asynchronously using `yield`.
 
-- **Coroutines**: Coroutines are implemented using Python generators. Coroutines can pause their execution using the `yield` keyword and resume later.
-- **Event Loop**: The event loop manages the execution of coroutines. It maintains a task queue and handles sleeping coroutines.
+## Scheduler for Yield Async Methods
 
-## YScheduler Class
+The `YScheduler` class serves as a scheduler for managing asynchronous coroutines. It utilizes a priority queue for sleeping coroutines and a task queue for pending coroutines.
 
-The `YScheduler` class is responsible for managing coroutines and the event loop:
+### Methods:
 
-- `wait(coro)`: Adds a coroutine to the task queue for execution.
-- `ev_sleep(duration)`: Schedules the current coroutine to sleep for a specified duration.
-- `event_loop_begin()`: Starts the event loop, which executes coroutines and manages sleeping coroutines.
+- `wait(coro)`: Adds a coroutine to the task queue.
+- `ev_sleep(duration)`: Puts the current coroutine to sleep for a specified duration.
+- `event_loop_begin()`: Initiates the event loop, executing coroutines as per their scheduling.
 
-## Example Usage
+## Asynchronous Examples
 
-The provided example demonstrates the usage of the asynchronous model:
+The provided examples, `s1` and `s2`, demonstrate synchronous code execution with delays using `sleep`.
 
-1. Two example coroutines (`s1_Y` and `s2_Y`) are defined using generators. These coroutines print messages asynchronously and schedule themselves to sleep using `sched.ev_sleep`.
-2. An instance of `YScheduler` (`sched`) is created.
-3. The example coroutines are scheduled for execution using `sched.wait`.
-4. The event loop is started using `sched.event_loop_begin`.
+### Replaced with Yield:
 
-## Example Output
+These examples are replaced with asynchronous versions using generators and `yield`:
 
-The output of the provided example will show messages printed asynchronously by the coroutines, with delays introduced by the sleep durations specified in the coroutines.
+- `s1_Y`: Asynchronously prints messages from somewhere with a delay between iterations.
+- `s2_Y`: Asynchronously prints some other values with a different delay between iterations.
 
-## Running the Example
+## Usage
 
-To run the example, execute the Python script containing the provided code. Ensure you have Python installed on your system.
+1. Create an instance of `YScheduler`.
+2. Add asynchronous coroutines to the scheduler using `wait`.
+3. Begin the event loop using `event_loop_begin`.
 
-```bash
-python asynchronous_model.py
-```
-
-## Contributions
-
-Contributions to this project are welcome! If you find any issues or have suggestions for improvement, feel free to open an issue or submit a pull request.
-
+```python
+if __name__ == "__main__":
+    sched = YScheduler()
+    sched.wait(s1_Y()) 
+    sched.wait(s2_Y())
+    sched.event_loop_begin()
 
