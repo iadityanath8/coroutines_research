@@ -1,92 +1,82 @@
-import time
-from threading import Thread
-import heapq
-from time import sleep
 from collections import deque
+import heapq
+import time
 
-# Basic Example of Generators
-def c1():   
-    result = 0
-    v = 0 
-    while True:
-        value = yield v
-        result += value
-        v = result
-
-#Scheduler for Yield async methods
-
-class YScheduler:
-    
+class Scheduler:
     def __init__(self) -> None:
-        self.task_queue = deque()
-        self.sleeping = []
-        self.current = None     # current executing coroutine
+        self.ready_task = deque()
+        self.sleeping_task = []
         self.id = 0
+        self.current = None
 
-    def wait(self,coro) -> None:
-        self.task_queue.append(coro)
+    def add_task(self,task_coro) -> None:
+        self.ready_task.append(task_coro)
     
-    def ev_sleep(self,duration) -> None:
+    def ev_sleep(self,t_val) -> None:
         self.id += 1
-        deadline = duration + time.time()
-        heapq.heappush(self.sleeping,(deadline,self.id,self.current))
-        self.current = None    #till now this coroutine will not exceute in here 
-    
-    # Event Loop
-    def event_loop_begin(self):
-        while self.task_queue or self.sleeping:
-            if not self.task_queue:
-                dead,_,coro = heapq.heappop(self.sleeping)
-                delta = dead - time.time()
+        tt = t_val + time.time()
+        heapq.heappush(self.sleeping_task,(tt,self.id,self.current))
+        self.current = None  # Stop every task in here 
 
-                if delta > 0:
-                    sleep(delta)
-                
-                self.wait(coro)
-                
-            self.current = self.task_queue.popleft()
+    def event_loop_begin(self) -> None:
+        while self.ready_task or self.sleeping_task:
+            if not self.ready_task:
+                deadline,_ ,coro = heapq.heappop(self.sleeping_task)
+                delta = deadline - time.time()
+
+                if delta > 0:        
+                    time.sleep(delta)  
+             
+                sched.add_task(coro)
+            
+            self.current = self.ready_task.popleft()
             try:
                 next(self.current)
                 if self.current:
-                    self.wait(self.current)
-            
+                    self.add_task(self.current)
             except StopIteration:
-                print("Done Event Loop")
                 pass
 
-#Going asyncrhrounous using Yield and Generators
+sched = Scheduler()
 
-def s1():
-    sleep(1)
-    for _ in range(4):
-        print("printing from somewhere")
-
-def s2():
-    sleep(0.9)
-    for _ in range(5):
-        print("printing someother values in here")
-
-#replacing these examples for the yield 
-sched = YScheduler()
-
-def s1_Y():
-    for _ in range(4):
-        print("printing from somewhere")
-        sched.ev_sleep(0.9)
-        yield
+class AsyncQueue():
+    def __init__(self) -> None:
+        self.items = deque()
+        self.getters = deque()
+    
+    def put(self,val) -> None:
+        self.items.append(val)
         
+        if self.getters:
+            sched.add_task(self.getters.popleft())
 
-def s2_Y():
-    for _ in range(5):        
-        print("printing someother values in here")
-        sched.ev_sleep(1)        
-        yield 
+    def get(self):
+        if not self.items:
+            self.getters.append(sched.current)
+            sched.current = None
+            yield 
+        return self.items.popleft()
 
+q = AsyncQueue()
+
+def producer(n):
+    for i in range(n):
+        print("Producing", i)
+        q.put(i)
+        yield sched.ev_sleep(1) 
+
+def consumer():
+    while True:
+        item = yield from q.get()
+        yield sched.ev_sleep(2)
+        if item is None:
+            break
+        print("Consuming",item) 
+    
+    print("Done")
 
 if __name__ == "__main__":
-    sched.wait(s1_Y()) 
-    sched.wait(s2_Y())
+    sched.add_task(producer(10))
+    sched.add_task(consumer())
     sched.event_loop_begin()
-
-
 

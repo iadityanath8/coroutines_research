@@ -107,7 +107,7 @@ def producer_async(stop):
         if x < stop:
             qbuffer.put(x)     
             print("Produced ",x)
-            sched.wait_until(lambda: _run(x + 1),1)
+            sched.wait_until(lambda: _run(x + 1),10)
         else:
             print("Producer Done")
             qbuffer.put(None)
@@ -120,23 +120,22 @@ def consumer_async():
             print("Consumer is Finished")
         else:
             print("Consumed ",x)
-            sched.wait_until(lambda: consumer_async(),3)
+            sched.wait_until(lambda: consumer_async(),1)
     
     qbuffer.get(_run)
 
 if __name__ == "__main__":
-    #  t1 = threading.Thread(target=producer)
-    #  t2 = threading.Thread(target=consumer)
+    #1 = threading.Thread(target=producer)
+    #t2 = threading.Thread(target=consumer)
 
-    #  t1.start()
-    #  t2.start()
+    #t1.start()
+    #t2.start()
 
-    #  t1.join()
-    #  t2.join()
+    #t1.join()
+    #t2.join()
 
-    #  print("Donde")
+    #print("Donde")
     
     sched.wait(lambda: producer_async(10))
     sched.wait(lambda: consumer_async())
-
     sched.run()
