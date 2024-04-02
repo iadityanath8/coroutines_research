@@ -8,7 +8,7 @@ def f():
 
 def g():
     for i in range(5):
-        print("Binjour mein friund")
+        print("Bonjour mein friund")
         yield
 
 
