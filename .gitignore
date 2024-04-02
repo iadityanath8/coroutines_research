@@ -1,2 +1,5 @@
 asnotes
 async.lorien
+makefile
+libgens.c
+test.c
