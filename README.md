@@ -1,42 +1,62 @@
-# Asynchronous Programming with Generators and Yield
+# MeowAsync Library Documentation
 
-This project demonstrates asynchronous programming in Python using generators and the `yield` statement. It includes a simple scheduler, `YScheduler`, which manages the execution of coroutines based on cooperative multitasking.
+## Overview
 
-## Basic Example of Generators
+This async library provides functionality for scheduling and executing asynchronous tasks using the round-robin scheduling algorithm. It includes a `Scheduler` class for managing tasks and an `AsyncQueue` class for implementing asynchronous queues.
 
-The `c1` function is an example of a coroutine defined using a generator. It calculates the running sum of provided values asynchronously using `yield`.
+## Classes
 
-## Scheduler for Yield Async Methods
+### Scheduler
 
-The `YScheduler` class serves as a scheduler for managing asynchronous coroutines. It utilizes a priority queue for sleeping coroutines and a task queue for pending coroutines.
+The `Scheduler` class manages the scheduling and execution of asynchronous tasks.
 
-### Methods:
+#### Methods
 
-- `wait(coro)`: Adds a coroutine to the task queue.
-- `ev_sleep(duration)`: Puts the current coroutine to sleep for a specified duration.
-- `event_loop_begin()`: Initiates the event loop, executing coroutines as per their scheduling.
+- `__init__()`: Initializes the scheduler with empty task queues.
+- `add_task(task_coro)`: Adds an asynchronous task coroutine to the ready task queue.
+- `ev_sleep(t_val)`: Suspends the current task and schedules it to be resumed after a specified time interval.
+- `event_loop_begin()`: Starts the event loop to execute tasks according to the round-robin scheduling algorithm.
 
-## Asynchronous Examples
+### AsyncQueue
 
-The provided examples, `s1` and `s2`, demonstrate synchronous code execution with delays using `sleep`.
+The `AsyncQueue` class implements an asynchronous queue.
 
-### Replaced with Yield:
+#### Methods
 
-These examples are replaced with asynchronous versions using generators and `yield`:
+- `__init__()`: Initializes the queue with an empty item deque and an empty getter deque.
+- `put(val)`: Adds an item to the queue and resumes a waiting getter coroutine if available.
+- `get()`: Retrieves an item from the queue asynchronously. If the queue is empty, suspends the current task until an item becomes available.
 
-- `s1_Y`: Asynchronously prints messages from somewhere with a delay between iterations.
-- `s2_Y`: Asynchronously prints some other values with a different delay between iterations.
-
-## Usage
-
-1. Create an instance of `YScheduler`.
-2. Add asynchronous coroutines to the scheduler using `wait`.
-3. Begin the event loop using `event_loop_begin`.
+## Example Usage
 
 ```python
-if __name__ == "__main__":
-    sched = YScheduler()
-    sched.wait(s1_Y()) 
-    sched.wait(s2_Y())
-    sched.event_loop_begin()
+from async_library import Scheduler, AsyncQueue
 
+# Create a scheduler
+sched = Scheduler()
+
+# Create an async queue
+q = AsyncQueue()
+
+# Define producer and consumer coroutines
+def producer(n):
+    for i in range(n):
+        print("Producing", i)
+        q.put(i)
+        yield sched.ev_sleep(1)
+
+def consumer():
+    while True:
+        item = yield from q.get()
+        yield sched.ev_sleep(2)
+        if item is None:
+            break
+        print("Consuming", item)
+    print("Done")
+
+# Add tasks to the scheduler
+sched.add_task(producer(10))
+sched.add_task(consumer())
+
+# Start the event loop
+sched.event_loop_begin()
